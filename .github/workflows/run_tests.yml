@@ -11,6 +11,7 @@ on:
         options:
           - first_test
           - second_test
+          - all
 
 permissions:
   contents: read
@@ -81,9 +82,15 @@ jobs:
       - name: first_test
         if: "github.event.inputs.deployment_target == 'first_test'" 
         run: pytest tests/test_site.py::test_open_s6 --alluredir=allure-results
+        continue-on-error: true
       - name: second_test
         if: "github.event.inputs.deployment_target == 'second_test'"
         run: pytest tests/test_site.py::test_two_monitors --alluredir=allure-results
+        continue-on-error: true
+      - name: all
+        if: "github.event.inputs.deployment_target == 'all'"
+        run: pytest --alluredir=allure-results
+        continue-on-error: true
       - name: Stire test results
         uses: actions/upload-artifact@v4
         with:

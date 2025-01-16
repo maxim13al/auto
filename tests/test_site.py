@@ -24,3 +24,6 @@ def test_two_monitors(driver):
     product = ProductPage(driver)
     time.sleep(2)
     product.check_products_count(2)
+
+def test_tst():
+    assert 1 == 2
