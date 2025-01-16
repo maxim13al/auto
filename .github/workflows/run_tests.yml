@@ -27,9 +27,50 @@ jobs:
         run: pip install -r requirements.txt
       - name: first_test
         if: "github.event.inputs.deployment_target == 'first_test'" 
-        run: pytest tests/test_site.py::test_open_s6
+        run: pytest tests/test_site.py::test_open_s6 --alluredir=allure-results
       - name: second_test
         if: "github.event.inputs.deployment_target == 'second_test'"
-        run: pytest tests/test_site.py::test_two_monitors
+        run: pytest tests/test_site.py::test_two_monitors --alluredir=allure-results
+      - name: Stire test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-results
+          path: 
+            allure-results
+          retention-days: 1
+  
+  generate-report:
+    runs-on: ubuntu-24.04
+    needs: run-tests
+    name: Generate report
+    steps:
+      - uses: actions/setup-java@v3
+        with:
+          distribution: "microsoft"
+          java-version: "17"
+      - run: sudo wget https://github.com/allure-framework/allure2/releases/download/2.22.4/allure-2.23.1.tgz && sudo tar -zxvf allure-2.23.1.tgz -C /opt/ && sudo ln -s /opt/allure-2.23.1/bin/allure /usr/bin/allure
+      - name: Download all workflow run artifacts  
+        uses: actions/download-artifact@v3
+      - run: allure generate -c allure-results -o _site
+      - name: Store generated report
+        uses: actions/upload-artifact@v3
+        with:
+          name: _site
+          path: 
+            _site
+          retention-days: 1
+
+  publish-report:
+    runs-on: ubuntu-24.04
+    needs: generate-report
+    name: Report publication
+    steps:
+      - name: Download all workflow run artifacts  
+        uses: actions/download-artifact@v3
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-action@v2
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1.2.9
           
     
