@@ -26,22 +26,22 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.12"
       - name: Install Chrome
         run: sudo apt-get install google-chrome-stable
       - name: install dependencies
         run: pip install -r requirements.txt
       - name: first_test
         if: "github.event.inputs.deployment_target == 'first_test'"
-        run: pytest tests/test_button.py::test_button_exist --alluredir=allure-results
+        run: pytest tests/test_site.py::test_open_s6 --alluredir=allure-results
         continue-on-error: true
       - name: second_test
         if: "github.event.inputs.deployment_target == 'second_test'"
-        run: pytest tests/test_button.py::test_button_exist_2 --alluredir=allure-results
+        run: pytest tests/test_site.py::test_two_monitors --alluredir=allure-results
         continue-on-error: true
       - name: all
         if: "github.event.inputs.deployment_target == 'all'"
@@ -62,7 +62,7 @@ jobs:
           -H 'Content-Type: application/json' 
           -d "{\"reportSpec\":{\"path\":[\"pathstring\"],\"executorInfo\":{\"name\":\"GitHub\",\"type\":\"exectype\",\"url\":\"https://github.com/senior-tester/run-tests-demo/actions/workflows/server.yml\",\"buildOrder\":0,\"buildName\":\"$GITHUB_RUN_NUMBER\",\"buildUrl\":\"https://github.com/senior-tester/run-tests-demo/actions/runs/$GITHUB_RUN_ID\",\"reportName\":\"my_report_name\",\"reportUrl\":\"my_report_url\"}},\"results\":[\"$UUID\"],\"deleteResults\":true}"
       - name: Store allure results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: allure-results
           path:
